@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch("https://stock-prediction-backend-k21j.onrender.com", {
+            const response = await fetch("https://stock-prediction-backend-k21j.onrender.com/predict", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
