@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const stockPriceChartCanvas = document.getElementById("stock-price-chart");
 
     let chartData = { labels: [], prices: [] }; // Hold the chart data for later use
+    let chartInstance = null; // Store the chart instance to avoid overlapping charts
 
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -41,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const response = await fetch("https://stock-prediction-backend-1.onrender.com", {
+            const response = await fetch("https://stock-prediction-backend-1.onrender.com/api/predict", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -56,8 +57,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const predictedData = await response.json();
 
+            // Validate that predictedData is an array
+            if (!Array.isArray(predictedData)) {
+                throw new Error("Invalid data received from the server");
+            }
+
             // Hide loading spinner and display predictions
             loadingSpinner.classList.add("hidden");
+
+            // Clear previous chart data
+            chartData = { labels: [], prices: [] };
 
             predictedData.forEach(({ date, price }) => {
                 // Create card for each predicted price
@@ -106,8 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function generateVisual(labels, prices) {
         const ctx = stockPriceChartCanvas.getContext('2d');
 
+        // Destroy existing chart if it exists to avoid overlapping
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
         // Create the chart
-        new Chart(ctx, {
+        chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels, // X-axis labels (dates)
@@ -138,5 +152,4 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
-
 });
